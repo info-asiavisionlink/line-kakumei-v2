@@ -49,7 +49,20 @@ export default function SignupPage() {
         return;
       }
 
-      toast.success("確認メールを送信しました。メール認証後にログインしてください。");
+      // Signup success should not be blocked by webhook failures.
+      await fetch("/api/auth/signup-hook", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          company_name: companyName,
+          email,
+          password,
+        }),
+      }).catch(() => null);
+
+      toast.success("登録完了（通知送信済み）。確認メール認証後にログインしてください。");
       router.push("/login");
     } catch {
       toast.error("登録処理に失敗しました。時間をおいて再試行してください。");
